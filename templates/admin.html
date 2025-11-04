@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin - Resource Management</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="bg-light p-5">
+<div class="container">
+    <h2 class="text-center mb-4">Admin Dashboard - Disaster Resource Allocation</h2>
+
+    {% if requests %}
+    <div class="card p-4 shadow">
+        <h4>Received Requests</h4>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Location</th>
+                    <th>Coordinates</th>
+                    <th>Food</th>
+                    <th>Water</th>
+                    <th>Clothes</th>
+                    <th>Medicine</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for req in requests %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ req.latitude }}, {{ req.longitude }}</td>
+                <td>{{ req.food }}</td>
+                <td>{{ req.water }}</td>
+                <td>{{ req.clothes }}</td>
+                <td>{{ req.medicine }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card p-4 mt-4 shadow">
+        <h4>Enter Available Resource Stock</h4>
+        <form action="/allocate" method="POST" class="row g-3">
+            <div class="col-md-3">
+                <label>Food Stock</label>
+                <input type="number" name="food_stock" class="form-control" required>
+            </div>
+            <div class="col-md-3">
+                <label>Water Stock</label>
+                <input type="number" name="water_stock" class="form-control" required>
+            </div>
+            <div class="col-md-3">
+                <label>Clothes Stock</label>
+                <input type="number" name="clothes_stock" class="form-control" required>
+            </div>
+            <div class="col-md-3">
+                <label>Medicine Stock</label>
+                <input type="number" name="medicine_stock" class="form-control" required>
+            </div>
+            <div class="col-12">
+                <button class="btn btn-success w-100 mt-3">Run Allocation</button>
+            </div>
+        </form>
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center mt-4">No requests submitted yet.</div>
+    {% endif %}
+</div>
+</body>
+</html>
