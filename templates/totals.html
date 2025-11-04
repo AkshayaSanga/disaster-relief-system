@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Total Stock Summary</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>Total Available Stock</h1>
+
+    <table>
+      <tr><th>Resource</th><th>Quantity</th></tr>
+      {% for resource, qty in total.items() %}
+        <tr><td>{{ resource }}</td><td>{{ qty }}</td></tr>
+      {% endfor %}
+    </table>
+
+    <div class="center">
+      <a href="{{ url_for('allocate') }}" class="btn">Proceed to Allocation</a>
+    </div>
+  </div>
+</body>
+</html>

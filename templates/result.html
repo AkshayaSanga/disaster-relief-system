@@ -1,48 +1,48 @@
-{% extends 'layout.html' %}
-{% block content %}
-<section class="report-section">
-    <h2>Optimized Resource Distribution Report</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Final Distribution Report</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>Final Resource Distribution Report</h1>
 
-    {% if report and report|length > 0 %}
+    {% for loc in allocations %}
+      <h3>Location — {{ loc.location }}</h3>
+      <table>
+        <tr>
+          <th>Resource</th>
+          <th>Requested</th>
+          <th>Allocated</th>
+          <th>Type</th>
+          <th>Priority</th>
+        </tr>
+        {% for r, info in loc.resources.items() %}
+          <tr>
+            <td>{{ r }}</td>
+            <td>{{ info.Requested }}</td>
+            <td>{{ info.Allocated }}</td>
+            <td>{{ info.Type }}</td>
+            <td>{{ info.Priority }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+      <p><strong>Total Priority Score:</strong> {{ loc.total_priority }}</p>
+    {% endfor %}
+
+    <h3>Remaining Stock</h3>
     <table>
-        <thead>
-            <tr>
-                <th>Location</th>
-                <th>Resource</th>
-                <th>Total Available</th>
-                <th>Requested</th>
-                <th>Allocated</th>
-                <th>Type</th>
-                <th>Priority</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for row in report %}
-            <tr>
-                <td>{{ row.location }}</td>
-                <td>{{ row.resource }}</td>
-                <td>{{ row.available }}</td>
-                <td>{{ row.requested }}</td>
-                <td>{{ row.allocated }}</td>
-                <td>{{ row.type }}</td>
-                <td>{{ row.priority }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
+      <tr><th>Resource</th><th>Remaining</th></tr>
+      {% for k, v in remaining.items() %}
+        <tr><td>{{ k }}</td><td>{{ v }}</td></tr>
+      {% endfor %}
     </table>
 
-    <div class="summary">
-        <h3>Total Priority Score: {{ total_priority }}</h3>
-        <p>
-            Remaining Stock →
-            Food: {{ remaining.food }},
-            Water: {{ remaining.water }},
-            Medicine: {{ remaining.medicine }},
-            Clothes: {{ remaining.clothes }}
-        </p>
+    <div class="center">
+      <a href="{{ url_for('home') }}" class="btn">Start New Allocation</a>
     </div>
-    {% else %}
-    <p>No report data available yet. Please enter requests first.</p>
-    {% endif %}
-</section>
-{% endblock %}
+  </div>
+</body>
+</html>

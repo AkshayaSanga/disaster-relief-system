@@ -1,104 +1,115 @@
-from flask import Flask, render_template, request, redirect, url_for, session
-from collections import defaultdict
+from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
-app.secret_key = "disaster_relief_secret_key"
 
-# --- Helper Functions ---
+# -----------------------------
+# Global variables
+# -----------------------------
+total_resources = {}
+remaining_resources = {}
+allocations = []
 
-def calculate_allocation(request_data, total_stock):
-    allocation_results = []
-    total_priority = 0
 
-    for resource, requested in request_data.items():
-        available = total_stock.get(resource, 0)
-        if requested <= available:
-            allocated = requested
-            alloc_type = "Full"
-        elif available > 0:
-            allocated = available
-            alloc_type = "Partial"
-        else:
-            allocated = 0
-            alloc_type = "None"
+# -----------------------------
+# Step 1 – Enter Total Stock
+# -----------------------------
+@app.route('/')
+def home():
+    """Initial resource input page."""
+    return render_template('index.html', total=None)
 
-        # Update remaining stock
-        total_stock[resource] = max(available - allocated, 0)
 
-        # Calculate priority (arbitrary but consistent weight)
-        priority = allocated * {"food": 9, "water": 8, "medicine": 10, "clothes": 5}.get(resource, 1)
-        total_priority += priority
+@app.route('/save_totals', methods=['POST'])
+def save_totals():
+    """Save total available stock and start allocation."""
+    global total_resources, remaining_resources, allocations
 
-        allocation_results.append({
-            "resource": resource.capitalize(),
-            "available": available,
-            "requested": requested,
-            "allocated": allocated,
-            "type": alloc_type,
-            "priority": priority
+    total_resources = {
+        "Food": int(request.form['food']),
+        "Water": int(request.form['water']),
+        "Clothes": int(request.form['clothes']),
+        "Medicine": int(request.form['medicine'])
+    }
+
+    remaining_resources = total_resources.copy()
+    allocations = []
+
+    # Redirect immediately to allocation step
+    return redirect(url_for('allocate'))
+
+
+# -----------------------------
+# Step 2 – Resource Allocation
+# -----------------------------
+@app.route('/allocate', methods=['GET', 'POST'])
+def allocate():
+    """Handle each new location request."""
+    global remaining_resources, allocations
+
+    if request.method == 'POST':
+        # Generate a simple location label
+        location_name = f"Location {len(allocations) + 1}"
+
+        # Get requested quantities
+        requests_data = {
+            "Food": int(request.form['food']),
+            "Water": int(request.form['water']),
+            "Clothes": int(request.form['clothes']),
+            "Medicine": int(request.form['medicine'])
+        }
+
+        allocation_result = {}
+        total_priority = 0
+
+        # Allocation logic
+        for resource, req_qty in requests_data.items():
+            avail = remaining_resources.get(resource, 0)
+            if req_qty <= avail:
+                allocated = req_qty
+                status = "Full"
+            elif avail > 0:
+                allocated = avail
+                status = "Partial"
+            else:
+                allocated = 0
+                status = "None"
+
+            remaining_resources[resource] = max(avail - allocated, 0)
+            priority = allocated * 10
+            total_priority += priority
+
+            allocation_result[resource] = {
+                "Requested": req_qty,
+                "Allocated": allocated,
+                "Type": status,
+                "Priority": priority
+            }
+
+        # Save this location’s allocation
+        allocations.append({
+            "location": location_name,
+            "resources": allocation_result,
+            "total_priority": total_priority
         })
 
-    return allocation_results, total_priority
+        # If stock exhausted or user clicks Exit, go to report
+        if all(v == 0 for v in remaining_resources.values()) or 'exit' in request.form:
+            return redirect(url_for('result'))
+
+    return render_template('request.html', remaining=remaining_resources)
 
 
-# --- Routes ---
-
-@app.route("/")
-def index():
-    remaining = session.get("remaining_stock", None)
-    return render_template("index.html", remaining=remaining)
-
-
-@app.route("/set_stock", methods=["POST"])
-def set_stock():
-    session["total_stock"] = {
-        "food": int(request.form["food"]),
-        "water": int(request.form["water"]),
-        "medicine": int(request.form["medicine"]),
-        "clothes": int(request.form["clothes"])
-    }
-    session["remaining_stock"] = session["total_stock"].copy()
-    session["report"] = []
-    return redirect(url_for("index"))
+# -----------------------------
+# Step 3 – Final Report
+# -----------------------------
+@app.route('/result')
+def result():
+    """Display final summary report."""
+    return render_template('result.html', allocations=allocations, remaining=remaining_resources)
 
 
-@app.route("/allocate", methods=["POST"])
-def allocate():
-    if "remaining_stock" not in session:
-        return redirect(url_for("index"))
-
-    location = request.form["location"]
-
-    request_data = {
-        "food": int(request.form["food"]),
-        "water": int(request.form["water"]),
-        "medicine": int(request.form["medicine"]),
-        "clothes": int(request.form["clothes"])
-    }
-
-    remaining_stock = session["remaining_stock"]
-    results, total_priority = calculate_allocation(request_data, remaining_stock)
-
-    # Append to report
-    report = session.get("report", [])
-    for entry in results:
-        entry["location"] = location
-        report.append(entry)
-
-    session["remaining_stock"] = remaining_stock
-    session["report"] = report
-
-    return redirect(url_for("report"))
-
-
-@app.route("/report")
-def report():
-    report = session.get("report", [])
-    remaining = session.get("remaining_stock", {"food": 0, "water": 0, "medicine": 0, "clothes": 0})
-    total_priority = sum(item["priority"] for item in report)
-    return render_template("report.html", report=report, remaining=remaining, total_priority=total_priority)
-
-
-# --- Main Entry Point ---
-if __name__ == "__main__":
-    app.run(debug=True)
+# -----------------------------
+# Run the app
+# -----------------------------
+if __name__ == '__main__':
+    app.run(debug=True, use_reloader=False)

@@ -1,49 +1,30 @@
-{% extends 'layout.html' %}
-{% block content %}
-<section class="form-section">
-    <h2>Set Total Available Stock</h2>
-    <form method="POST" action="{{ url_for('set_stock') }}">
-        <label>Food:</label>
-        <input type="number" name="food" required>
-        <label>Water:</label>
-        <input type="number" name="water" required>
-        <label>Medicine:</label>
-        <input type="number" name="medicine" required>
-        <label>Clothes:</label>
-        <input type="number" name="clothes" required>
-        <button type="submit">Set Stock</button>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Disaster Relief Resource Management</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>Disaster Relief Resource Management</h1>
+    <h2>Step 1 — Enter Total Available Resources</h2>
+
+    <form action="{{ url_for('save_totals') }}" method="post" class="form-card">
+      <label>Food</label>
+      <input type="number" name="food" placeholder="Enter Food quantity" required min="1">
+
+      <label>Water</label>
+      <input type="number" name="water" placeholder="Enter Water quantity" required min="1">
+
+      <label>Clothes</label>
+      <input type="number" name="clothes" placeholder="Enter Clothes quantity" required min="1">
+
+      <label>Medicine</label>
+      <input type="number" name="medicine" placeholder="Enter Medicine quantity" required min="1">
+
+      <button type="submit" class="btn">Save Totals</button>
     </form>
-</section>
-
-<hr>
-
-<section class="form-section">
-    <h2>Enter Request for Location</h2>
-    <form method="POST" action="{{ url_for('allocate') }}">
-        <label>Location:</label>
-        <input type="text" name="location" required>
-        <label>Food Needed:</label>
-        <input type="number" name="food" required>
-        <label>Water Needed:</label>
-        <input type="number" name="water" required>
-        <label>Medicine Needed:</label>
-        <input type="number" name="medicine" required>
-        <label>Clothes Needed:</label>
-        <input type="number" name="clothes" required>
-        <button type="submit">Allocate Resources</button>
-    </form>
-</section>
-
-{% if remaining %}
-<hr>
-<section class="status-section">
-    <h3>Current Remaining Stock</h3>
-    <ul>
-        <li>Food: {{ remaining.food }}</li>
-        <li>Water: {{ remaining.water }}</li>
-        <li>Medicine: {{ remaining.medicine }}</li>
-        <li>Clothes: {{ remaining.clothes }}</li>
-    </ul>
-</section>
-{% endif %}
-{% endblock %}
+  </div>
+</body>
+</html>
