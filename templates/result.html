@@ -1,53 +1,48 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Resource Allocation Results</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-</head>
-<body class="bg-light p-5">
-<div class="container text-center">
-    <h2 class="mb-4">Optimized Resource Distribution Report</h2>
+{% extends 'layout.html' %}
+{% block content %}
+<section class="report-section">
+    <h2>Optimized Resource Distribution Report</h2>
 
-    <div class="card shadow p-4">
-        <table class="table table-bordered table-striped">
-            <thead>
-                <tr>
-                    <th>Location</th>
-                    <th>Resource</th>
-                    <th>Total Available</th>
-                    <th>Requested</th>
-                    <th>Allocated</th>
-                    <th>Type</th>
-                    <th>Priority</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for a in allocations %}
+    {% if report and report|length > 0 %}
+    <table>
+        <thead>
             <tr>
-                <td>{{ a.location }}</td>
-                <td>{{ a.resource }}</td>
-                <td>{{ available_stock[a.resource.lower()] }}</td>
-                <td>{{ a.requested_qty }}</td>
-                <td>{{ a.allocated_qty }}</td>
-                <td>{{ a.allocation_type }}</td>
-                <td>{{ a.priority_value }}</td>
+                <th>Location</th>
+                <th>Resource</th>
+                <th>Total Available</th>
+                <th>Requested</th>
+                <th>Allocated</th>
+                <th>Type</th>
+                <th>Priority</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in report %}
+            <tr>
+                <td>{{ row.location }}</td>
+                <td>{{ row.resource }}</td>
+                <td>{{ row.available }}</td>
+                <td>{{ row.requested }}</td>
+                <td>{{ row.allocated }}</td>
+                <td>{{ row.type }}</td>
+                <td>{{ row.priority }}</td>
             </tr>
             {% endfor %}
-            </tbody>
-        </table>
+        </tbody>
+    </table>
 
-        <div class="mt-4">
-            <h5>Total Priority Score: {{ total_priority }}</h5>
-            <p>
-                Remaining Stock → Food: {{ remaining_stock.food }},
-                Water: {{ remaining_stock.water }},
-                Clothes: {{ remaining_stock.clothes }},
-                Medicine: {{ remaining_stock.medicine }}
-            </p>
-        </div>
-
-        <a href="/admin" class="btn btn-primary mt-3">Back to Dashboard</a>
+    <div class="summary">
+        <h3>Total Priority Score: {{ total_priority }}</h3>
+        <p>
+            Remaining Stock →
+            Food: {{ remaining.food }},
+            Water: {{ remaining.water }},
+            Medicine: {{ remaining.medicine }},
+            Clothes: {{ remaining.clothes }}
+        </p>
     </div>
-</div>
-</body>
-</html>
+    {% else %}
+    <p>No report data available yet. Please enter requests first.</p>
+    {% endif %}
+</section>
+{% endblock %}

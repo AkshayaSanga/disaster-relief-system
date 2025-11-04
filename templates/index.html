@@ -1,63 +1,49 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Disaster Relief Resource Request</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places"></script>
-    <script>
-        function initLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    position => {
-                        document.getElementById("latitude").value = position.coords.latitude.toFixed(6);
-                        document.getElementById("longitude").value = position.coords.longitude.toFixed(6);
-                    },
-                    () => alert("Location access denied. Please enable it.")
-                );
-            }
-        }
-    </script>
-</head>
-<body onload="initLocation()" class="bg-light">
-<div class="container p-5">
-    <h2 class="text-center mb-4">Disaster Relief Resource Request</h2>
-    <div class="card shadow p-4">
-        <form action="/submit_request" method="POST">
-            <div class="mb-3">
-                <label>Latitude</label>
-                <input type="text" id="latitude" name="latitude" class="form-control" readonly>
-            </div>
-            <div class="mb-3">
-                <label>Longitude</label>
-                <input type="text" id="longitude" name="longitude" class="form-control" readonly>
-            </div>
+{% extends 'layout.html' %}
+{% block content %}
+<section class="form-section">
+    <h2>Set Total Available Stock</h2>
+    <form method="POST" action="{{ url_for('set_stock') }}">
+        <label>Food:</label>
+        <input type="number" name="food" required>
+        <label>Water:</label>
+        <input type="number" name="water" required>
+        <label>Medicine:</label>
+        <input type="number" name="medicine" required>
+        <label>Clothes:</label>
+        <input type="number" name="clothes" required>
+        <button type="submit">Set Stock</button>
+    </form>
+</section>
 
-            <h5>Enter Required Quantities</h5>
-            <div class="row">
-                <div class="col">
-                    <label>Food</label>
-                    <input type="number" name="food" class="form-control" min="0" value="0">
-                </div>
-                <div class="col">
-                    <label>Water</label>
-                    <input type="number" name="water" class="form-control" min="0" value="0">
-                </div>
-            </div>
-            <div class="row mt-2">
-                <div class="col">
-                    <label>Clothes</label>
-                    <input type="number" name="clothes" class="form-control" min="0" value="0">
-                </div>
-                <div class="col">
-                    <label>Medicine</label>
-                    <input type="number" name="medicine" class="form-control" min="0" value="0">
-                </div>
-            </div>
+<hr>
 
-            <button class="btn btn-primary mt-4 w-100">Submit Request</button>
-        </form>
-    </div>
-</div>
-</body>
-</html>
+<section class="form-section">
+    <h2>Enter Request for Location</h2>
+    <form method="POST" action="{{ url_for('allocate') }}">
+        <label>Location:</label>
+        <input type="text" name="location" required>
+        <label>Food Needed:</label>
+        <input type="number" name="food" required>
+        <label>Water Needed:</label>
+        <input type="number" name="water" required>
+        <label>Medicine Needed:</label>
+        <input type="number" name="medicine" required>
+        <label>Clothes Needed:</label>
+        <input type="number" name="clothes" required>
+        <button type="submit">Allocate Resources</button>
+    </form>
+</section>
+
+{% if remaining %}
+<hr>
+<section class="status-section">
+    <h3>Current Remaining Stock</h3>
+    <ul>
+        <li>Food: {{ remaining.food }}</li>
+        <li>Water: {{ remaining.water }}</li>
+        <li>Medicine: {{ remaining.medicine }}</li>
+        <li>Clothes: {{ remaining.clothes }}</li>
+    </ul>
+</section>
+{% endif %}
+{% endblock %}
